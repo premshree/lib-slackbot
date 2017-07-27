@@ -1,0 +1,16 @@
+{
+	"ImportPath": "github.com/premshree/lib-slackbot",
+	"GoVersion": "go1.8",
+	"GodepVersion": "v79",
+	"Deps": [
+		{
+			"ImportPath": "github.com/nlopes/slack",
+			"Comment": "v0.1.0-5-gca8436d",
+			"Rev": "ca8436d76f805ec1e682eaae2de3c3a9bc894b0f"
+		},
+		{
+			"ImportPath": "golang.org/x/net/websocket",
+			"Rev": "f01ecb60fe3835d80d9a0b7b2bf24b228c89260e"
+		}
+	]
+}
