@@ -20,7 +20,11 @@ type command struct {
   Callback fn
 }
 
-type fn func(*Bot, string, ...string)
+type fn func(*Bot, string, string, ...string)
+
+var (
+  channelsMap map[string]slack.Channel
+)
 
 // Initializes a new slackbot
 func New(slackToken string) *Bot {
@@ -31,7 +35,8 @@ func New(slackToken string) *Bot {
 }
 
 // AddCommand lets you add a command that your slack bot can respond to. It passes back
-// the bot (*slackbot.Bot), a channel(string), and a variadic args to the callback.
+// the bot (*slackbot.Bot), a channel ID (string), a channel (string), and a variadic
+// args to the callback.
 func (b *Bot) AddCommand(message, description string, callback fn, args ...string) {
   b.commands[message] = command{
     Name: message,
@@ -45,6 +50,8 @@ func (b *Bot) AddCommand(message, description string, callback fn, args ...strin
 func (b *Bot) Run() {
   rtm := b.api.NewRTM()
   go rtm.ManageConnection()
+
+  channelsMap = b.getAllChannels()
 
   for msg := range rtm.IncomingEvents {
     switch ev := msg.Data.(type) {
@@ -69,16 +76,30 @@ func (b *Bot) Reply(channel string, reply string) {
 func (b *Bot) handleMessage(msg slack.Msg) {
   messageSlice := strings.Split(msg.Text, " ")
   command := messageSlice[0]
-  channel := msg.Channel
+  channelID := msg.Channel
+  channelName := channelsMap[channelID].Name
   var args []string
   if len(messageSlice) > 1 {
     args = messageSlice[1:]
   }
   if _, ok := b.commands[command]; ok {
     if args != nil && args[0] == HELP {
-      b.Reply(channel, b.commands[command].Description)
+      b.Reply(channelID, b.commands[command].Description)
     } else {
-      b.commands[command].Callback(b, channel, args...)
+      b.commands[command].Callback(b, channelID, channelName, args...)
     }
   }
+}
+
+func (b *Bot) getAllChannels() map[string]slack.Channel {
+  allChannels, err := b.api.GetChannels(false)
+  if err != nil {
+    log.Fatalf("Uh oh, error fetching channels: %v", err)
+  }
+  channelsMap := make(map[string]slack.Channel)
+  for _, channel := range allChannels {
+    channelsMap[channel.ID] = channel
+  }
+
+  return channelsMap
 }
