@@ -83,6 +83,7 @@ func (b *Bot) handleMessage(msg slack.Msg) {
     args = messageSlice[1:]
   }
   if _, ok := b.commands[command]; ok {
+    log.Printf("♔ %s; Channel: %s; User: %s", command, channelName, msg.User)
     if args != nil && args[0] == HELP {
       b.Reply(channelID, b.commands[command].Description)
     } else {
