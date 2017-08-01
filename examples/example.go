@@ -22,7 +22,6 @@ func init() {
   viper.AutomaticEnv()
   viper.ReadInConfig()
   slackToken = viper.GetString("slack_token")
-  fmt.Println(slackToken)
   openWeatherMapToken = viper.GetString("owm_token")
 }
 
