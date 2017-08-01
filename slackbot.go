@@ -35,9 +35,8 @@ func New(slackToken string) *Bot {
 }
 
 // AddCommand lets you add a command that your slack bot can respond to. It passes back
-// the bot (*slackbot.Bot), a channel ID (string), a channel (string), and a variadic
-// args to the callback.
-func (b *Bot) AddCommand(message, description string, callback fn, args ...string) {
+// the bot (*slackbot.Bot), a channel ID (string), a channel (string).
+func (b *Bot) AddCommand(message, description string, callback fn) {
   b.commands[message] = command{
     Name: message,
     Description: description,
