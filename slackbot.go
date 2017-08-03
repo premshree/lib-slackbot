@@ -113,7 +113,6 @@ func (b *Bot) getAllChannels() map[string]interface{} {
   for _, group := range allGroups {
     channelsMap[group.ID] = group
   }
-  log.Printf("Channels: %v", channelsMap)
 
   return channelsMap
 }
