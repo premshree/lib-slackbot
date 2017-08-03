@@ -23,7 +23,7 @@ type command struct {
 type fn func(*Bot, string, string, ...string)
 
 var (
-  channelsMap map[string]slack.Channel
+  channelsMap map[string]interface{}
 )
 
 // Initializes a new slackbot
@@ -76,7 +76,13 @@ func (b *Bot) handleMessage(msg slack.Msg) {
   messageSlice := strings.Split(msg.Text, " ")
   command := messageSlice[0]
   channelID := msg.Channel
-  channelName := channelsMap[channelID].Name
+  var channelName string
+  switch v := channelsMap[channelID].(type) {
+  case slack.Channel:
+    channelName = v.Name
+  case slack.Group:
+    channelName = v.Name
+  }
   var args []string
   if len(messageSlice) > 1 {
     args = messageSlice[1:]
@@ -91,15 +97,23 @@ func (b *Bot) handleMessage(msg slack.Msg) {
   }
 }
 
-func (b *Bot) getAllChannels() map[string]slack.Channel {
-  allChannels, err := b.api.GetChannels(false)
+func (b *Bot) getAllChannels() map[string]interface{} {
+  allChannels, err := b.api.GetChannels(true)
   if err != nil {
     log.Fatalf("Uh oh, error fetching channels: %v", err)
   }
-  channelsMap := make(map[string]slack.Channel)
+  allGroups, err := b.api.GetGroups(true)
+  if err != nil {
+    log.Fatalf("Uh oh, error fetching private channels %v", err)
+  }
+  channelsMap := make(map[string]interface{})
   for _, channel := range allChannels {
     channelsMap[channel.ID] = channel
   }
+  for _, group := range allGroups {
+    channelsMap[group.ID] = group
+  }
+  log.Printf("Channels: %v", channelsMap)
 
   return channelsMap
 }
