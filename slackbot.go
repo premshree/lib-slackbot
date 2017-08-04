@@ -52,7 +52,7 @@ func (b *Bot) Run() {
   go rtm.ManageConnection()
 
   channelsMap = b.getAllChannels()
-  usersMap := b.getAllUsers()
+  usersMap = b.getAllUsers()
 
   for msg := range rtm.IncomingEvents {
     switch ev := msg.Data.(type) {
